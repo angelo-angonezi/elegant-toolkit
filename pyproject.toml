@@ -1,0 +1,15 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "elegant-toolkit"
+version = "0.0.2"
+description = "C.elegans bioimage analysis Toolkit (under active development)"
+readme = "README.md"
+authors = [{name = "Angelo Luiz Angonezi", email = "angeloangonezi2@gmail.com"}]
+requires-python = ">=3.9"
+keywords = ["python", "toolkit", "image analysis", "microscopy"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
