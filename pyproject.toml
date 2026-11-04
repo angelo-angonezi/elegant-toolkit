@@ -10,14 +10,6 @@ readme = "README.md"
 authors = [{name = "Angelo Luiz Angonezi", email = "angeloangonezi2@gmail.com"}]
 requires-python = ">=3.10"
 keywords = ["python", "toolkit", "image analysis", "microscopy"]
-
-[project.urls]
-Homepage = "https://github.com/angelo-angonezi/elegant-toolkit"
-Issues = "https://github.com/angelo-angonezi/elegant-toolkit/issues"
-
-[tool.setuptools.packages.find]
-where = ["src"]
-
 dependencies = [
     # imaging / microscopy IO
     # pycudadecon is deliberately *not* listed here: its PyPI wheel doesn't ship a working
@@ -92,6 +84,10 @@ gpu = [
     "cupy-cuda13x",
 ]
 
+[project.urls]
+Homepage = "https://github.com/angelo-angonezi/elegant-toolkit"
+Issues = "https://github.com/angelo-angonezi/elegant-toolkit/issues"
+
 [tool.setuptools.packages.find]
 where = ["src"]
 
@@ -122,4 +118,3 @@ cet-download_pycudadecon = "cet.setup.download_pycudadecon:main"
 "cet.gui.fonts" = ["*.ttf"]
 "cet.gui.icons" = ["*.png"]
 "cet.gui.tooltips" = ["*.json"]
-"cet.pipelines.settings" = ["*.yaml"]
