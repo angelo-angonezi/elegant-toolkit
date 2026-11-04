@@ -21,16 +21,32 @@ Create a conda environment with Python 3.10 or newer, then install the package f
 conda create -n elegant_toolkit python=3.12
 ```
 
-CPU only:
+### pip install
 
 ```
-pip install -e .[cpu]
+pip install elegant-toolkit
 ```
 
-NVIDIA GPU (CUDA 13):
+### local install
+
+Clone the repo with:
 
 ```
-pip install -e .[gpu] --extra-index-url https://download.pytorch.org/whl/cu130
+git clone https://github.com/angelo-angonezi/elegant-toolkit.git
+```
+
+And install with:
+
+(CPU only)
+
+```
+pip install .[cpu]
+```
+
+(GPU - CUDA 13x)
+
+```
+pip install .[gpu] --extra-index-url https://download.pytorch.org/whl/cu130
 ```
 
 Then run the setup steps below, and check the installation with `cet-version`, `cet-check_gpu` and `cet-check_java`.
