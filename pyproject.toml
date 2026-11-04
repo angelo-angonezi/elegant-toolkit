@@ -18,6 +18,83 @@ Issues = "https://github.com/angelo-angonezi/elegant-toolkit/issues"
 [tool.setuptools.packages.find]
 where = ["src"]
 
+dependencies = [
+    # imaging / microscopy IO
+    # pycudadecon is deliberately *not* listed here: its PyPI wheel doesn't ship a working
+    # compiled cudaDecon backend and doesn't install properly on hpc - install it via
+    # conda-forge instead, with "cet-download_pycudadecon" (see cet.setup.download_pycudadecon),
+    # same pattern jpype1/openjdk below uses via "cet-download_jdk"
+    "pims",
+    "nd2reader",
+    "tifffile",
+    "zarr",
+    "pillow",
+    "cellpose",
+    "psf-generator",
+    # GUI
+    "pyqt6",
+    "pyshortcuts",
+    "napari",
+    "cachey",  # backs dask's opportunistic Cache, used by cet.gui.viewer.napari_loader
+    # java bridge (embeds a JVM via a system JDK - see environments/*.yml;
+    # the JDK itself is a system/conda dependency, not pip-installable)
+    "jpype1",
+    # dataframes / numerics / stats
+    "numpy",
+    "pandas",
+    "scipy",
+    "scikit-learn",
+    "scikit-posthocs",
+    "pingouin",
+    "cliffs-delta",
+    "natsort",
+    "umap-learn",
+    "POT",
+    "networkx",
+    # 3D / mesh
+    "mahotas",
+    "pytree2",
+    "pyvista",
+    "pymcubes",
+    # plotting
+    "matplotlib",
+    "seaborn",
+    "plotly",
+    # settings / config
+    "pydantic",
+    "ruamel.yaml",
+    "pyyaml",
+    "openpyxl",
+    # misc utils
+    "psutil",
+    "albumentationsx",
+    "nvidia-ml-py3",
+]
+
+[project.optional-dependencies]
+# plain (non-CUDA) torch build from the default PyPI index
+cpu = [
+    "torch",
+    "torchvision",
+    "torchinfo",
+]
+# CUDA-accelerated stack. torch/torchvision here need the CUDA build, which
+# PEP 508 dependency specifiers can't select on their own - install with:
+#   pip install -e .[gpu] --extra-index-url https://download.pytorch.org/whl/cu130
+# (matching environments/environment_gpu.yml's own pip install). cupy additionally
+# expects a working CUDA toolkit/driver on the system. pycudadecon isn't listed here
+# at all - see the comment next to "pims" above; install it separately via
+# "cet-download_pycudadecon".
+gpu = [
+    "torch",
+    "torchvision",
+    "torchinfo",
+    "cupy-cuda13x",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
 [project.scripts]
 
 # gui
