@@ -1,0 +1,366 @@
+# vsi to tif module
+
+print('initializing...')  # noqa
+
+# Code destined to converting
+# vsi files fields stacks into
+# tif files.
+
+######################################################################
+# imports
+
+print('importing required libraries...')  # noqa
+from os import environ
+from numpy import array
+from os.path import join
+from tifffile import imwrite
+from cet.config import JAVA_MEMORY
+from argparse import ArgumentParser
+from cet.io.files import get_skip_file_bool
+from cet.io.files import save_metadata_file
+from cet.io.files import get_files_in_folder
+from pims.bioformats import BioformatsReader
+from cet.progress_tracker.ProgressTracker import ProgressTracker
+from cet.preprocessing.converters.metadata import extract_metadata
+print('all required libraries successfully imported.')  # noqa
+print(f'JAVA_HOME: {environ.get("JAVA_HOME")}')  # noqa
+
+######################################################################
+# argument parsing related functions
+
+
+def get_args_dict() -> dict:
+    """
+    Parses command-line arguments and returns
+    them as a dictionary.
+
+    Returns:
+        dict: A dictionary containing all parsed command-line arguments.
+    """
+    # defining program description
+    description = "vsi to tif module"
+
+    # creating a parser instance
+    parser = ArgumentParser(description=description)
+
+    # adding arguments to parser
+
+    # input folder param
+    parser.add_argument('-i', '--input-folder',
+                        dest='input_folder',
+                        type=str,
+                        required=True,
+                        help='defines path to folder containing input files [.vsi]')
+
+    # output folder param
+    parser.add_argument('-o', '--output-folder',
+                        dest='output_folder',
+                        type=str,
+                        required=True,
+                        help='defines output folder (folder that will contain converted images [.tif])')
+
+    # overwrite output param
+    parser.add_argument('-ow', '--overwrite-output',
+                        dest='overwrite_output',
+                        action='store_true',
+                        required=False,
+                        help='defines whether overwrite files in output folder (skips existing output by default)')
+
+    # skip enter param
+    parser.add_argument('-s', '--skip-enter',
+                        dest='skip_enter',
+                        action='store_true',
+                        required=False,
+                        help='defines whether to suppress "Enter to continue" input before execution')
+
+    # creating arguments dictionary
+    args_dict = vars(parser.parse_args())
+
+    # returning the arguments dictionary
+    return args_dict
+
+######################################################################
+# progress tracking related functions
+
+
+class ModuleProgressTracker(ProgressTracker):
+    """
+    Defines ModuleProgressTracker class.
+    """
+    # defining ProgressTracker init
+    def __init__(self) -> None:
+        """
+        Initializes a ModuleProgressTracker
+        instance and defines class attributes.
+        """
+        # inheriting attributes and methods from ProgressTracker
+        super().__init__()
+
+    # overwriting class methods (using current module specific attributes)
+
+    def get_progress_string(self) -> str:
+        """
+        Returns a formatted progress
+        string, based on current progress
+        attributes.
+
+        Returns:
+            str: The current progress string.
+        """
+        # assembling current progress string
+        progress_string = f''
+
+        # checking if iterations total has already been obtained
+        if not self.totals_updated.is_set():
+
+            # updating progress string based on attributes
+            progress_string += f'calculating totals...'
+            progress_string += f' {self.wheel_symbol}'
+            progress_string += f' | images: {self.iterations_num}'
+            progress_string += f' | iterations: {self.iterations_num}'
+            progress_string += f' | elapsed time: {self.elapsed_time_str}'
+
+        # if total iterations already obtained
+        else:
+
+            # updating progress string based on attributes
+            progress_string += f'converting files...'
+            progress_string += f' {self.wheel_symbol}'
+            progress_string += f' | image: {self.current_iteration}/{self.iterations_num}'
+            progress_string += f' | progress: {self.progress_percentage_str}'
+            progress_string += f' | elapsed time: {self.elapsed_time_str}'
+            progress_string += f' | ETC: {self.etc_str}'
+
+        # returning progress string
+        return progress_string
+
+    def update_totals(self,
+                      args_dict: dict
+                      ) -> None:
+        """
+        Implements module specific method
+        to update total iterations num.
+
+        Args:
+            args_dict (dict): A dictionary containing all parsed command-line arguments.
+
+        Returns:
+            None.
+        """
+        # getting input folder
+        input_folder = args_dict['input_folder']
+
+        # getting images
+        images = get_files_in_folder(input_folder=input_folder,
+                                     extension='.vsi')
+
+        # iterating over files
+        for _ in images:
+
+            # updating progress tracker attributes
+            self.iterations_num += 1
+
+        # updating totals string
+        totals_string = f'totals...'
+        totals_string += f' | images: {self.iterations_num}'
+        totals_string += f' | iterations: {self.iterations_num}'
+        self.totals_string = totals_string
+
+        # signaling totals updated
+        self.signal_totals_updated()
+
+######################################################################
+# defining auxiliary functions
+
+
+def convert_file(input_path: str,
+                 output_path: str
+                 ) -> None:
+    """
+    Given a path to a vsi file,
+    converts it into a tif file,
+    saving output to given path.
+
+    Args:
+        input_path (str): The path to the vsi file to convert.
+        output_path (str): The path to save the converted tif file to.
+
+    Returns:
+        None.
+    """
+    # reading image
+    image = BioformatsReader(filename=input_path,
+                             java_memory=JAVA_MEMORY)
+
+    # bundling axes (sets axes order)
+    image.bundle_axes = 'zyxc'
+
+    # converting pim object to numpy array
+    image = array(image)
+
+    # extracting image from sequence
+    image = image[0]
+
+    # converting image to 16bit
+    image = image.astype('uint16')
+
+    # saving image
+    imwrite(output_path,
+            image)
+
+    # manually deleting image from memory
+    # (java bridge issues make the image be stored even though it should be overwritten)
+    del image
+
+
+def vsi_to_tif(input_folder: str,
+               output_folder: str,
+               overwrite_output: bool,
+               progress_tracker: ModuleProgressTracker
+               ) -> None:
+    """
+    Given a path to a folder containing
+    vsi files, converts files to tifs,
+    saving results to given output folder.
+
+    Args:
+        input_folder (str): The path to the folder containing vsi files to convert.
+        output_folder (str): The path to the folder to save converted tif files to.
+        overwrite_output (bool): Whether to overwrite existing files in output folder.
+        progress_tracker (ModuleProgressTracker): The current module's progress tracker instance.
+
+    Returns:
+        None.
+    """
+    # getting files in input folder
+    files = get_files_in_folder(input_folder=input_folder,
+                                extension='.vsi')
+
+    # checking whether there are files to extract metadata from (files in folder are
+    # assumed to share virtually identical metadata - only the first one is used)
+    if files:
+
+        # getting metadata file path
+        metadata_path = join(output_folder,
+                             'metadata.json')
+
+        # getting skip metadata file bool
+        skip_metadata = get_skip_file_bool(file_path=metadata_path,
+                                           overwrite_output=overwrite_output)
+
+        # checking whether to (re-)extract metadata
+        if not skip_metadata:
+
+            # getting first file input path
+            first_file_path = join(input_folder,
+                                   files[0])
+
+            # extracting first file metadata
+            metadata = extract_metadata(input_path=first_file_path)
+
+            # saving extracted metadata
+            save_metadata_file(output_folder=output_folder,
+                               metadata=metadata)
+
+    # iterating over files in input folder
+    for file_name in files:
+
+        # updating progress tracker attributes
+        progress_tracker.current_iteration += 1
+
+        # getting current file input/output paths
+        input_path = join(input_folder,
+                          file_name)
+        output_name = file_name.replace('.vsi', '.tif')
+        output_path = join(output_folder,
+                           output_name)
+
+        # getting skip file bool
+        skip_file = get_skip_file_bool(file_path=output_path,
+                                       overwrite_output=overwrite_output)
+
+        # checking whether to skip current file
+        if skip_file:
+
+            # sleeping
+            progress_tracker.wait(0.05)
+
+            # updating progress tracker attributes
+            progress_tracker.skipped_iterations += 1
+
+            # skipping to next file
+            continue
+
+        # trying to convert file
+        try:
+
+            # converting current file
+            convert_file(input_path=input_path,
+                         output_path=output_path)
+
+        # handling exception
+        except Exception as e:
+
+            # printing error message
+            e_string = f'Unable to load file "{input_path}".\n'
+            e_string += f'Error: {e}\n'
+            e_string += f'Skipping...'
+            print(e_string)
+
+            # skipping to next file
+            continue
+
+
+def parse_and_run(args_dict: dict,
+                  progress_tracker: ModuleProgressTracker
+                  ) -> None:
+    """
+    Extracts args from args_dict
+    and runs module function.
+
+    Args:
+        args_dict (dict): A dictionary containing all parsed command-line arguments.
+        progress_tracker (ModuleProgressTracker): The current module's progress tracker instance.
+
+    Returns:
+        None.
+    """
+    # getting input folder
+    input_folder = args_dict['input_folder']
+
+    # getting output folder
+    output_folder = args_dict['output_folder']
+
+    # getting overwrite output
+    overwrite_output = args_dict['overwrite_output']
+
+    # running vsi_to_tif function
+    vsi_to_tif(input_folder=input_folder,
+               output_folder=output_folder,
+               overwrite_output=overwrite_output,
+               progress_tracker=progress_tracker)
+
+######################################################################
+# defining main function
+
+
+def main():
+    """
+    Runs main code.
+    """
+    # initializing current module progress tracker instance
+    progress_tracker = ModuleProgressTracker()
+
+    # running code in separate thread
+    progress_tracker.run(function=parse_and_run,
+                         args_parser=get_args_dict)
+
+######################################################################
+# running main function
+
+
+if __name__ == '__main__':
+    main()
+
+######################################################################
+# end of current module
