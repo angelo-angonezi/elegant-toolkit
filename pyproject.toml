@@ -4,11 +4,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "elegant-toolkit"
-version = "0.0.4"
+version = "0.1.0"
 description = "C.elegans bioimage analysis Toolkit (under active development)"
 readme = "README.md"
 authors = [{name = "Angelo Luiz Angonezi", email = "angeloangonezi2@gmail.com"}]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 keywords = ["python", "toolkit", "image analysis", "microscopy"]
 
 [project.urls]
@@ -17,3 +17,32 @@ Issues = "https://github.com/angelo-angonezi/elegant-toolkit/issues"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[project.scripts]
+
+# gui
+cet-gui = "cet.gui.app:main"
+cet-napari = "cet.gui.viewer.napari_loader:main"
+cet-create_shortcut = "cet.gui.create_shortcut:main"
+
+# diagnostics
+cet-options = "cet.diagnostics.list_commands:main"
+cet-version = "cet.diagnostics.check_version:main"
+cet-check_imports = "cet.diagnostics.check_imports:main"
+cet-check_gpu = "cet.diagnostics.check_gpu:main"
+cet-check_java = "cet.diagnostics.check_java:main"
+cet-test_gpu = "cet.gpu.test_gpu:main"
+
+# setup / updating
+cet-update = "cet.setup.update:main"
+cet-build_update_folder = "cet.setup.build_update_folder:main"
+cet-download_cp_models = "cet.setup.download_cp_models:main"
+cet-download_jdk = "cet.setup.download_jdk:main"
+cet-download_loci_jar = "cet.setup.download_loci_jar:main"
+cet-download_pycudadecon = "cet.setup.download_pycudadecon:main"
+
+[tool.setuptools.package-data]
+"cet.gui.fonts" = ["*.ttf"]
+"cet.gui.icons" = ["*.png"]
+"cet.gui.tooltips" = ["*.json"]
+"cet.pipelines.settings" = ["*.yaml"]
