@@ -377,7 +377,7 @@ def save_fields(file_name: str,
         field = array(field)
 
         # converting image to 16bit
-        field = field.astype('uint16')  # TODO: check if this is an issue when working with deconvolved images
+        field = field.astype('uint16')
 
         # saving image
         imwrite(current_save_path,

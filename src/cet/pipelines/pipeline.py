@@ -374,7 +374,6 @@ NUCLEI_PAIRWISE_DISTANCES_DF_PATH = join(JOINED_DFS_FOLDER, 'nuclei_pairwise_dis
 DOTS_PAIRWISE_DISTANCES_DFS_FOLDER = join(PAIRWISE_DISTANCES_DFS_FOLDER, 'dots')
 
 # NUCLEI_BORDER_DISTANCES_DF_PATH = join(JOINED_DFS_FOLDER, 'nuclei_joined_df_w_border_distances.csv')
-# TODO: temporary fix! Only because generate_mask_distances_df does not yet support embryo_id as input (hardcoded embryo+nucleus id inner loop)
 NUCLEI_BORDER_DISTANCES_DF_PATH = join(JOINED_DFS_FOLDER, 'nuclei_joined_df.csv')
 DOTS_BORDER_DISTANCES_DF_PATH = join(JOINED_DFS_FOLDER, 'dots_joined_df_w_border_distances.csv')
 

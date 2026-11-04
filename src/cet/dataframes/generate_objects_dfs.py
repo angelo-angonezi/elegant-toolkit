@@ -1589,7 +1589,6 @@ def get_textures_dict(image: ndarray,
     # defining placeholder value for textures dict
     textures_dict = {}
 
-    # TODO: add this to argparser as haralick-levels
     # defining haralick levels
     levels = 64
 

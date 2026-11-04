@@ -218,7 +218,6 @@ def optimize_bit_depth(input_folder: str,
     Returns:
         None.
     """
-    # TODO: add option to do this with max instead of unique
     # getting files in input folder
     files = get_files_in_folder(input_folder=input_folder,
                                 extension='.tif')

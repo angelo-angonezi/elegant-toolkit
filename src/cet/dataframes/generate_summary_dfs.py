@@ -287,7 +287,6 @@ def get_cols_num_by_df(dots_df: DataFrame,
                        border_description: str
                        ) -> dict:
     """
-    # TODO: create similar function in normalize_summary_dfs (right now there are too many calls in normalize_summary_dfs just for the totals count
     Given dots/cytoplasm dfs, returns a
     dict with the number of summary cols
     that will be added to each of
