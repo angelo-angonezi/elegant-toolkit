@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "elegant-toolkit"
-version = "0.1.0"
+version = "0.1.1"
 description = "C.elegans bioimage analysis Toolkit (under active development)"
 readme = "README.md"
 authors = [{name = "Angelo Luiz Angonezi", email = "angeloangonezi2@gmail.com"}]
