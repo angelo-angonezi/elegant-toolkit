@@ -1,0 +1,207 @@
+experiment:
+  base_folder: .\data_tmp\pipeline_tests
+  image_extension: .vsi
+microscopy:
+  numerical_aperture: 1.45
+  refractive_index: 1.515
+  xy_scale: 0.065
+  z_scale: 0.21
+  z_axis: 0
+channels:
+  ch0:
+    name: dapi
+    wavelength: 405
+  ch1:
+    name: pgl
+    wavelength: 561
+  ch2:
+    name: h3k9
+    wavelength: 640
+  ch3:
+    name: null
+    wavelength: null
+  embryos_crops:
+    name: embryo_id
+  nuclei_resized:
+    name: nucleus_id
+segmentation:
+  embryos:
+    description: emb
+    segmentation_channel: 0
+    deconvolve: false
+    blur: true
+    close_masks: true
+    merge_masks: false
+    resize_masks: true
+    create_borders_masks: true
+    blur_sigma: 28.8
+    diameter: 300
+    min_size: 2000000
+    closing_distance: 20
+    merge_solidity_threshold: 0.9
+    merge_touch_margin: 1
+    dilation: 30
+    smooth_iterations: 20
+    borders_thickness: 3
+    borders_description: 'embryo_border'
+    margin: 30
+    batch_size: 64
+    measurements:
+      ch0:
+        - intensity
+      ch1:
+        - intensity
+    filters:
+      pixel_volume: ">= 2000000"
+      area_vol_ratio: "<= 0.191"
+      border_pixel_ratio: "<= 0.009"
+  nuclei:
+    description: nuc
+    segmentation_channel: 0
+    deconvolve: false
+    blur: false
+    close_masks: true
+    merge_masks: false
+    resize_masks: true
+    create_borders_masks: true
+    blur_sigma: 1.2
+    diameter: 30
+    min_size: 2000
+    closing_distance: 5
+    merge_solidity_threshold: 0.9
+    merge_touch_margin: 1
+    dilation: 0
+    smooth_iterations: 30
+    borders_thickness: 2
+    borders_description: 'lamina'
+    margin: 0
+    batch_size: 32
+    measurements:
+      ch0:
+        - intensity
+      ch1:
+        - intensity
+        - texture
+      embryos_crops:
+        - id
+    filters:
+      pixel_volume: ">= 2000"
+      embryo_id: "> 0"
+  dots:
+    dot1:
+      description: 'pgl'
+      segmentation_channel: 1
+      deconvolve: true
+      dog: true
+      blur_sigma_low: 1.1
+      blur_sigma_high: 1.6
+      lower_threshold: 20
+      segmentation_mode: binary
+      smooth_iterations: 30
+      measurements:
+        ch0:
+          - intensity
+        ch1:
+          - intensity
+        embryos_crops:
+          - id
+        nuclei:
+          - id
+      filters:
+        pixel_volume: ">= 8"
+        embryo_id: "> 0"
+        nucleus_id: "> 0"
+    dot2:
+      description: 'h3k9'
+      segmentation_channel: 2
+      deconvolve: true
+      dog: true
+      blur_sigma_low: 1.1
+      blur_sigma_high: 1.6
+      lower_threshold: 20
+      segmentation_mode: binary
+      smooth_iterations: 30
+      measurements:
+        ch0:
+          - intensity
+        ch1:
+          - intensity
+        embryos_crops:
+          - id
+        nuclei:
+          - id
+      filters:
+        pixel_volume: ">= 8"
+        embryo_id: "> 0"
+        nucleus_id: "> 0"
+additional_toggles:
+  map_nuclei_to_images: false
+  signal_measurements:
+    embryos_border_signal: false
+    nuclei_border_signal: false
+  nuclei:
+    pairwise_distances: false
+    border_distances: false
+  dots:
+    dot1:
+      pairwise_distances: false
+      border_distances: false
+    dot2:
+      pairwise_distances: false
+      border_distances: false
+  calculate_dots_distances: false
+  dots_distance_dot1_description: pgl
+  dots_distance_dot2_description: h3k9
+  dots_distance_mode: hungarian
+  overlap_threshold: 0.5
+cescale:
+  reference_folder: null
+  reference_dataset: bao
+  cell_types_path: null
+  gene_expression_path: null
+  tree_fill_color_col: cell_count
+  tree_fill_color_palette: Viridis
+  tree_edge_color_col: null
+  tree_edge_color_palette: Viridis
+  tree_edge_width: null
+  tree_size_col: cell_count
+  tree_hover_cols: null
+  tree_format: horizontal
+pipeline_toggles:
+  initial_preprocessing: true
+  generate_final_tables: false
+  run_cescale: false
+  embryos:
+    image_preprocessing: false
+    segmentation: false
+    masks_postprocessing: false
+    create_tables: false
+    create_crops: false
+  nuclei:
+    image_preprocessing: false
+    segmentation: false
+    masks_postprocessing: false
+    create_tables: false
+    create_crops: false
+  cytoplasm:
+    image_preprocessing: false
+    segmentation: false
+    masks_postprocessing: false
+    create_tables: false
+    create_crops: false
+  dots:
+    dot1:
+      image_preprocessing: false
+      segmentation: false
+      masks_postprocessing: false
+      create_tables: false
+    dot2:
+      image_preprocessing: false
+      segmentation: false
+      masks_postprocessing: false
+      create_tables: false
+runtime:
+  skip_enter: true
+  overwrite_output: false
+  simulate_run: false
+  clear_intermediate_files: false
